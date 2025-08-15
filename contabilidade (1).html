@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contabilidade I - Sistema de Gestão</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Ubuntu Mono', monospace;
+            background: linear-gradient(135deg, #000000 0%, #2c2c2c 25%, #4a4a4a 50%, #6a6a6a 75%, #c0c0c0 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #e0e0e0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .card-title:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .expand-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .card-content {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .card-content.expanded {
+            display: flex;
+            opacity: 1;
+            max-height: 1000px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .item-text {
+            flex: 1;
+            font-size: 0.95rem;
+            color: #e0e0e0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 25px;
+            font-family: 'Ubuntu Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+            background: linear-gradient(135deg, #ffed4e, #ffd700);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Popup maximizado para links */
+        .link-popup {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .link-popup-content {
+            position: relative;
+            width: 95%;
+            height: 95%;
+            margin: 2.5%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        .link-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .link-popup-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffd700;
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .link-popup iframe {
+            width: 100%;
+            height: calc(100% - 80px);
+            border: none;
+            background: white;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #ffd700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            color: #ffed4e;
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .modal-body ol {
+            padding-left: 1.5rem;
+        }
+
+        .modal-body li {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-left: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .item {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #ffed4e, #ffd700);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CONTABILIDADE I</h1>
+            <p>Sistema de Gestão Contábil</p>
+        </div>
+
+        <div class="grid">
+            <!-- Importação dos perfis de empresas -->
+            <div class="card">
+                <h2 class="card-title" onclick="toggleCard(this)">
+                    <span>Importação dos Perfis</span>
+                    <span class="expand-icon">▼</span>
+                </h2>
+                <div class="card-content">
+                    <div class="item">
+                        <span class="item-text">Importação dos perfis de empresas</span>
+                        <button class="btn" onclick="openModal('modal1')">Ver Passos</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plano de contas -->
+            <div class="card">
+                <h2 class="card-title" onclick="toggleCard(this)">
+                    <span>Plano de Contas</span>
+                    <span class="expand-icon">▼</span>
+                </h2>
+                <div class="card-content">
+                    <div class="item">
+                        <span class="item-text">Cadastrar conta contábil</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=43&palavraChave=cadastrar%20conta&modulosSelecionados=1&intencaoID=0', 'Cadastrar conta contábil')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Alterar conta contábil</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=43&palavraChave=cadastrar%20conta&modulosSelecionados=1&intencaoID=0', 'Alterar conta contábil')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Excluir conta contábil</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=52&palavraChave=excluir%20conta%20cont%C3%A1bil&modulosSelecionados=0&intencaoID=0', 'Excluir conta contábil')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Replicar conta contábil</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=48&palavraChave=replicar%20conta%20cont%C3%A1bil&modulosSelecionados=0&intencaoID=0', 'Replicar conta contábil')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Históricos</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=1760&palavraChave=hist%C3%B3ricos&modulosSelecionados=0&intencaoID=0', 'Históricos')">Acessar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lançamentos contábeis -->
+            <div class="card">
+                <h2 class="card-title" onclick="toggleCard(this)">
+                    <span>Lançamentos Contábeis</span>
+                    <span class="expand-icon">▼</span>
+                </h2>
+                <div class="card-content">
+                    <div class="item">
+                        <span class="item-text">Lançamentos comuns</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=1278&palavraChave=como%20fazer%20lan%C3%A7amento%20cont%C3%A1bil&modulosSelecionados=0&intencaoID=0', 'Lançamentos comuns')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Lançamentos padrões</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=113&palavraChave=como%20fazer%20lan%C3%A7amentos%20padr%C3%B5es&modulosSelecionados=0&intencaoID=0', 'Lançamentos padrões')">Acessar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatórios Contábeis -->
+            <div class="card">
+                <h2 class="card-title" onclick="toggleCard(this)">
+                    <span>Relatórios Contábeis</span>
+                    <span class="expand-icon">▼</span>
+                </h2>
+                <div class="card-content">
+                    <div class="item">
+                        <span class="item-text">Diário</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=1811&palavraChave=di%C3%A1rio&modulosSelecionados=0&intencaoID=0', 'Diário')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Razão</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=1817&palavraChave=raz%C3%A3o&modulosSelecionados=0&intencaoID=0', 'Razão')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Balancete</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=1809&palavraChave=balancete&modulosSelecionados=1&intencaoID=0', 'Balancete')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Comparativo de movimento</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=1828&palavraChave=comparativo%20de%20movimento&modulosSelecionados=0&intencaoID=0', 'Comparativo de movimento')">Acessar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Encerramento -->
+            <div class="card">
+                <h2 class="card-title" onclick="toggleCard(this)">
+                    <span>Encerramento</span>
+                    <span class="expand-icon">▼</span>
+                </h2>
+                <div class="card-content">
+                    <div class="item">
+                        <span class="item-text">Encerramento/Zeramento</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=45&palavraChave=zeramento&modulosSelecionados=0&intencaoID=0', 'Encerramento/Zeramento')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Excluir encerramento/zeramento</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=41&palavraChave=excluir%20zeramento&modulosSelecionados=0&intencaoID=0', 'Excluir encerramento/zeramento')">Acessar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Balanço e Demonstrativos -->
+            <div class="card">
+                <h2 class="card-title" onclick="toggleCard(this)">
+                    <span>Balanço e Demonstrativos</span>
+                    <span class="expand-icon">▼</span>
+                </h2>
+                <div class="card-content">
+                    <div class="item">
+                        <span class="item-text">Balanço</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=2093&palavraChave=balan%C3%A7o&modulosSelecionados=0&intencaoID=0', 'Balanço')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">DRE</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=10836&palavraChave=dre&modulosSelecionados=0&intencaoID=0', 'DRE')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">DMPL</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=248&palavraChave=dmpl&modulosSelecionados=0&intencaoID=0', 'DMPL')">Acessar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Utilitários -->
+            <div class="card">
+                <h2 class="card-title" onclick="toggleCard(this)">
+                    <span>Utilitários</span>
+                    <span class="expand-icon">▼</span>
+                </h2>
+                <div class="card-content">
+                    <div class="item">
+                        <span class="item-text">Alterar lançamentos</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=59&palavraChave=alterar%20lan%C3%A7amentos&modulosSelecionados=0&intencaoID=0', 'Alterar lançamentos')">Acessar</button>
+                    </div>
+                    <div class="item">
+                        <span class="item-text">Consultar lançamentos</span>
+                        <button class="btn" onclick="openLinkPopup('https://suporte.dominioatendimento.com/central/faces/solucao.html?codigo=1876&palavraChave=consultar%20lan%C3%A7amentos&modulosSelecionados=0&intencaoID=0', 'Consultar lançamentos')">Acessar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Importação dos perfis -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Importação dos perfis de empresas</h3>
+                <button class="close" onclick="closeModal('modal1')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ol>
+                    <li>//Controle/Empresas</li>
+                    <li>Clicar em [ Importação ]</li>
+                    <li>Selecionar a opção "Conforme cadastro de perfis de empresas"</li>
+                    <li>Clicar no campo perfil e pressionar F2</li>
+                    <li>Importar o perfil de acordo com regime tributário de cada empresa</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup maximizado para links -->
+    <div id="linkPopup" class="link-popup">
+        <div class="link-popup-content">
+            <div class="link-popup-header">
+                <h3 class="link-popup-title" id="linkPopupTitle">Carregando...</h3>
+                <button class="close" onclick="closeLinkPopup()">&times;</button>
+            </div>
+            <iframe id="linkPopupFrame" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function toggleCard(titleElement) {
+            const card = titleElement.parentElement;
+            const content = card.querySelector('.card-content');
+            const icon = titleElement.querySelector('.expand-icon');
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                icon.classList.add('expanded');
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function openLinkPopup(url, title) {
+            const popup = document.getElementById('linkPopup');
+            const titleElement = document.getElementById('linkPopupTitle');
+            const iframe = document.getElementById('linkPopupFrame');
+            
+            titleElement.textContent = title;
+            iframe.src = url;
+            popup.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLinkPopup() {
+            const popup = document.getElementById('linkPopup');
+            const iframe = document.getElementById('linkPopupFrame');
+            
+            popup.style.display = 'none';
+            iframe.src = 'about:blank';
+            document.body.style.overflow = 'auto';
+        }
+
+        function openLink(url) {
+            window.open(url, '_blank');
+        }
+
+        // Fechar modal clicando fora dele
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            const linkPopup = document.getElementById('linkPopup');
+            if (event.target === linkPopup) {
+                closeLinkPopup();
+            }
+        }
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    modal.style.display = 'none';
+                });
+                closeLinkPopup();
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Animação de entrada suave
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
+
